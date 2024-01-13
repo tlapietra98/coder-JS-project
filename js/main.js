@@ -1,7 +1,7 @@
 
 // REFERENCIAS A ELEMENTOS HTML
-
-const textElement = document.getElementById('text1');
+const sceneHeader = document.getElementById("sceneHeader");
+const sceneContainer = document.getElementById("sceneContainer");
 
 // CLASES
 
@@ -20,46 +20,32 @@ class Player{
         this.state = savedPlayer.state;
         this.inventory = savedPlayer.inventory;
     } */
-
-
     showInfo(){
     }
-
-
     showInventoryString(){
         
     }
-
-
 }
 
-
 class Item{
-
     constructor(nameP, typeP, priceP, descriptionP){
         this.name = nameP;
         this.type = typeP;
         this.price = priceP;
         this.description = descriptionP;
-        
     }
 }
 
-
 class Shop{
-
     constructor(productsP){
         this.products = productsP;
     }
-
 
     showItems(){
         this.products.forEach(item => {
             console.log(item);
         })
-
     }
-
 
     buyItems(playerP){
         
@@ -79,10 +65,7 @@ class Shop{
                 p = "";
                 alert("Please enter a valid name.");
             }
-        
-        
             if (p.price > 0) {
-                
                 if (p.price <= playerP.gold) {
                     playerP.gold -= p.price;
                     alert("Thank you for your purchase!");
@@ -95,67 +78,84 @@ class Shop{
                     alert("You don't have enough gold!");
                 }
             }
-        
             alert(`You currently have: ${playerP.gold} gold.`);
             console.log(`You currently have: ${playerP.gold} gold.`);
-
 /*             alert(`You currently possess the following items in your inventory: ${playerP.inventory}.`);
             console.log(`You currently possess the following items in your inventory: ${playerP.inventory}.`); */
-        
         }
-
-        
-
     }
-
 }
 
+// VOIDS - ESCENAS
+
+function playerCreation(){
+    
+    clearScene();
+
+    let div = document.createElement("div");
+    div.innerHTML =`
+    <h2>Welcome to the Magic Shop!</h2>
+    <p>Please enter your name and gold:</p>
+    <form id="playerform">
+    <input type="text">
+    <input type="number">
+    <input type="submit" value="Confirm">
+    </form>
+    `;
+    sceneContainer.appendChild(div);
+
+    let form = document.getElementById("playerform");
+
+    // PLAYER CREATION EVENTO
+    form.addEventListener("submit", (e) =>{
+        e.preventDefault();
+
+        let inputs = e.target.children;
+        let name = inputs[0].value;
+        let gold = inputs[1].value;
+
+        if(name != "")
+        {
+            if(!isNaN(gold) && gold > 0)
+            {
+                player = createPlayer(name, gold); //creo al jugador y le asigno a player
+                welcomePlayer(player);
+            }
+            else{
+                writeMessage("Please enter a valid amount.");
+                gold = -1;
+            }
+        }
+        else{
+            writeMessage("Please enter a valid name.");
+            name = "";
+        }
+    })
+}
 
 // FUNCIONES
 
-function createPlayer(){
-    
-    let playerName = "";
-    let playerGold = -1;
-    
-    while(playerName == ""){
-    
-        playerName = prompt("Enter your name:");
-        console.log("Enter your name:");
-    
-        if(playerName != "")
-        {
-            alert("Welcome to the Magic Shop, " + playerName.toString() + "!");
-            console.log("Welcome to the Magic Shop, " + playerName.toString() + "!");
-        }
-        else{
-            alert("Please enter a valid name.");
-            console.log("Please enter a valid name.");
-        }
-    }
-    
-    while(playerGold <= -1){
-    
-        playerGold = prompt("How much gold do you have?");
-        console.log("How much gold do you have?");
-    
-        if(!isNaN(playerGold) && playerGold > -1)
-        {
-            alert("You currently have: " + playerGold.toString() + " gold.");
-            console.log("You currently have: " + playerGold.toString() + " gold.");
-        }
-        else{
-            playerGold = -1;
-            alert("Please enter a valid amount.");
-            console.log("Please enter a valid amount.");
-        }
-    }
-    
-    
-    const player = new Player(playerName, playerGold);
-    
-    return player;
+function writeMessage(message){
+    let div = document.createElement("div");
+    div.innerHTML = message;
+    sceneContainer.appendChild(div);
+}
 
+function clearScene(){
+    while(sceneContainer.firstChild){
+        sceneContainer.removeChild(sceneContainer.firstChild);
+    }
+}
+
+function createPlayer(playerName, playerGold){
+    const createdPlayer = new Player(playerName, playerGold);
+    return createdPlayer;
+}
+
+function welcomePlayer(player){
+    clearScene();
+    writeMessage("Welcome to the Magic Shop, " + player.name.toString() + "!");
+    writeMessage("You currently have: " + player.gold.toString() + " gold.");
 }
 
 function generateItems(){
@@ -171,20 +171,16 @@ function generateItems(){
     return itemList;
 }
 
-
 //------------------------------------------------- 
 
+let player = "";
 
-let player = createPlayer();
-
+playerCreation();
 
 let shop = new Shop(generateItems());
 
-shop.showItems();
+//shop.showItems();
 
-shop.buyItems(player);
-
-
-
+//shop.buyItems(player);
 
 

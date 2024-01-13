@@ -9,13 +9,32 @@ body{
     margin: 0;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: start;
     width: 100vw;
     height: 100vh;
     background-color: darkslategrey;
 }
 
-.container{
+#mainDiv{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: start;
+
+}
+
+#sceneHeader{
+    display: flex;
+    justify-content: start;
+    align-items: start;
+    width: 100;
+}
+
+#sceneContainer{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: start;
 
     width: 1000px;
     max-width: 80%;
