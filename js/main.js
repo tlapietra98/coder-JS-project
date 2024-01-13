@@ -171,13 +171,13 @@ function generateItems(){
     return itemList;
 }
 
-//------------------------------------------------- 
+//--------------------MAIN----------------------------- 
 
 let player = "";
 
-playerCreation();
-
 let shop = new Shop(generateItems());
+
+playerCreation();
 
 //shop.showItems();
 
