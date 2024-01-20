@@ -86,11 +86,46 @@ class Shop{
     }
 }
 
-// VOIDS - ESCENAS
+// ESCENAS
+
+function startGame(){
+    clearScene();
+
+    sceneHeader.textContent = "Game Start";
+
+    let div = document.createElement("div");
+    div.innerHTML =`
+    <h2>Welcome to Adventure Game!</h2>
+    <p>Would you like to start a new game?</p>
+    <button id="newgame">New Game</button>
+    <button id="loadgame">Load Game</button>
+    `;
+    sceneContainer.appendChild(div);
+
+    let buttonNew = document.getElementById("newgame");
+    let buttonLoad = document.getElementById("loadgame");
+    
+    // GAME START EVENTO
+
+    buttonNew.addEventListener("click", (e) =>{
+        playerCreation();
+    })
+
+    buttonLoad.addEventListener("click", (e) =>{
+        if(localStorage.getItem("player")){
+            loadPlayer();
+            welcomePlayer();
+        }
+        else{
+            writeMessage("There is no saved game, please start a new game.");
+        }
+    })
+}
 
 function playerCreation(){
-    
     clearScene();
+
+    sceneHeader.textContent = "Player Creation";
 
     let div = document.createElement("div");
     div.innerHTML =`
@@ -119,7 +154,8 @@ function playerCreation(){
             if(!isNaN(gold) && gold > 0)
             {
                 player = createPlayer(name, gold); //creo al jugador y le asigno a player
-                welcomePlayer(player);
+                savePlayer(); //guardo el jugador en la memoria local
+                welcomePlayer();
             }
             else{
                 writeMessage("Please enter a valid amount.");
@@ -131,6 +167,13 @@ function playerCreation(){
             name = "";
         }
     })
+}
+
+
+function welcomePlayer(){
+    clearScene();
+    writeMessage("Welcome to the Magic Shop, " + player.name.toString() + "!");
+    writeMessage("You currently have: " + player.gold.toString() + " gold.");
 }
 
 // FUNCIONES
@@ -152,10 +195,12 @@ function createPlayer(playerName, playerGold){
     return createdPlayer;
 }
 
-function welcomePlayer(player){
-    clearScene();
-    writeMessage("Welcome to the Magic Shop, " + player.name.toString() + "!");
-    writeMessage("You currently have: " + player.gold.toString() + " gold.");
+function savePlayer(){
+    localStorage.setItem("player", JSON.stringify(player))
+}
+
+function loadPlayer(){
+    player = JSON.parse(localStorage.getItem("player"));
 }
 
 function generateItems(){
@@ -177,7 +222,7 @@ let player = "";
 
 let shop = new Shop(generateItems());
 
-playerCreation();
+startGame();
 
 //shop.showItems();
 
