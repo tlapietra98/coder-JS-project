@@ -112,13 +112,7 @@ function startGame(){
     })
 
     buttonLoad.addEventListener("click", (e) =>{
-        if(localStorage.getItem("player")){
-            loadPlayer();
-            welcomePlayer();
-        }
-        else{
-            writeMessage("There is no saved game, please start a new game.");
-        }
+        localStorage.getItem("player") ? (loadPlayer(), welcomePlayer()) : writeMessage("There is no saved game, please start a new game.");
     })
 }
 
