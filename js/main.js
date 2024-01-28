@@ -1,3 +1,4 @@
+// TODO implementar escena donde se muestran los items del shop y la compra de items y su guardado en el inventario del jugador
 
 // REFERENCIAS A ELEMENTOS HTML
 const sceneHeader = document.getElementById("sceneHeader");
@@ -20,6 +21,7 @@ class Player{
         this.state = savedPlayer.state;
         this.inventory = savedPlayer.inventory;
     } */
+    
     showInfo(){
     }
     showInventoryString(){
@@ -221,5 +223,3 @@ startGame();
 //shop.showItems();
 
 //shop.buyItems(player);
-
-
