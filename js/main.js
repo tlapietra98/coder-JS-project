@@ -1,4 +1,7 @@
 // TODO implementar escena donde se muestran los items del shop y la compra de items y su guardado en el inventario del jugador
+// TODO agregar opcione de checkout de la tienda en la funcion del item shop
+// TODO agregar chequeo del shopping cart, para que si ya tenes cierto item en el cart solo te agregue amount
+// TODO agregar boton para vaciar el cart
 
 // REFERENCIAS A ELEMENTOS HTML
 const sceneHeader = document.getElementById("sceneHeader");
@@ -15,13 +18,13 @@ class Player{
         this.inventory = [];
     }  
 
-/*     constructor(savedPlayer){
+    loadSavedData(savedPlayer){
         this.name = savedPlayer.name;
         this.gold = savedPlayer.gold;
         this.state = savedPlayer.state;
         this.inventory = savedPlayer.inventory;
-    } */
-    
+        }
+
     showInfo(){
     }
     showInventoryString(){
@@ -38,17 +41,78 @@ class Item{
     }
 }
 
+class CartItem{
+    constructor(cItem, cAmount){
+        this.item = new Item(cItem.name, cItem.type, cItem.price, cItem.description);
+        this.amount = cAmount;
+    }
+
+    getPrice(){
+        return this.item.price * this.amount;
+    }
+}
+
+class ShoppingCart{
+    constructor(){
+        this.itemList = [];
+    }
+
+    emptyCart(){
+        itemList = [];
+    }
+
+    calculateTotal(){
+        let total = 0;
+        this.itemList.forEach(i =>{
+            total += i.getPrice();
+        })
+        return total;
+    }
+
+    showCartItems(){
+        this.itemList.forEach(i =>{
+            let div = document.createElement("div");
+            div.innerHTML =`
+            <p>-${i.item.name}. Amount: ${i.amount}. Price: ${i.getPrice()} gold.</p>
+            `;
+            sceneContainer.appendChild(div);
+        })
+    }
+}
+
 class Shop{
-    constructor(productsP){
-        this.products = productsP;
+    constructor(){
+        this.itemList = [];
+        this.generateItems();
+        this.shoppingCart = new ShoppingCart();
+    }
+
+    generateItems(){
+        let lifePotion = new Item("life potion", "consumable", 50, "a potion that restores health");
+        let manaPotion = new Item("mana potion", "consumable", 60, "a potion that restores mana");
+        let invisibilityPotion = new Item("invisibility potion", "consumable", 100, "a potion that makes one invisible");
+        let dagger = new Item("dagger", "weapon", 20, "a sharp dagger");
+        let sword = new Item("sword", "weapon", 40, "a steel sword");
+        let shield = new Item("shield", "shield", 30, "a standard wooden shield");
+    
+        this.itemList = [lifePotion, manaPotion, invisibilityPotion, dagger, sword, shield]
+    }
+
+    itemExists(itemN){ 
+        return this.itemList.find((item) => item.name == itemN);
     }
 
     showItems(){
-        this.products.forEach(item => {
-            console.log(item);
+        this.itemList.forEach(item => {
+            let div = document.createElement("div");
+            div.innerHTML =`
+            <p>-${item.name}. Type: ${item.type}. ${item.description}. Cost: ${item.price} gold.</p>
+            `;
+            sceneContainer.appendChild(div);
         })
     }
 
+    //borrar ?
     buyItems(playerP){
         
         let finishedShopping = false;
@@ -57,7 +121,7 @@ class Shop{
         
             let shopChoice = prompt("Please enter the name of the product you would like to purchase:");
         
-            let p = this.products.find((item) => item.name === shopChoice);
+            let p = this.itemList.find((item) => item.name === shopChoice);
 
             if (p){
                 alert(`You have selected the ${p.name}.`);
@@ -86,6 +150,7 @@ class Shop{
             console.log(`You currently possess the following items in your inventory: ${playerP.inventory}.`); */
         }
     }
+
 }
 
 // ESCENAS
@@ -107,14 +172,14 @@ function startGame(){
     let buttonNew = document.getElementById("newgame");
     let buttonLoad = document.getElementById("loadgame");
     
-    // GAME START EVENTO
+    // GAME START EVENTOS
 
     buttonNew.addEventListener("click", (e) =>{
         playerCreation();
     })
 
     buttonLoad.addEventListener("click", (e) =>{
-        localStorage.getItem("player") ? (loadPlayer(), welcomePlayer()) : writeMessage("There is no saved game, please start a new game.");
+        localStorage.getItem("player") ? (loadPlayer(), town()) : Swal.fire({title:"There is no saved game!", confirmButtonColor:"grey"});
     })
 }
 
@@ -125,7 +190,7 @@ function playerCreation(){
 
     let div = document.createElement("div");
     div.innerHTML =`
-    <h2>Welcome to the Magic Shop!</h2>
+    <h2>Welcome!</h2>
     <p>Please enter your name and gold:</p>
     <form id="playerform">
     <input type="text">
@@ -150,26 +215,152 @@ function playerCreation(){
             if(!isNaN(gold) && gold > 0)
             {
                 player = createPlayer(name, gold); //creo al jugador y le asigno a player
-                savePlayer(); //guardo el jugador en la memoria local
                 welcomePlayer();
             }
             else{
-                writeMessage("Please enter a valid amount.");
+                Swal.fire({title:"Please enter a valid amount.", confirmButtonColor:"grey"});
                 gold = -1;
             }
         }
         else{
-            writeMessage("Please enter a valid name.");
+            Swal.fire({title:"Please enter a valid name.", confirmButtonColor:"grey"});
             name = "";
         }
     })
 }
 
-
 function welcomePlayer(){
     clearScene();
-    writeMessage("Welcome to the Magic Shop, " + player.name.toString() + "!");
-    writeMessage("You currently have: " + player.gold.toString() + " gold.");
+
+    sceneHeader.textContent = "Player Creation";
+
+    let div = document.createElement("div");
+    div.innerHTML =`
+    <h2>Welcome, ${player.name}!</h2>
+    <p>You currently have: ${player.gold} gold.</p>
+    <button id="pcconfirm">Confirm</button>
+    <button id="pcback">Go Back</button>
+    `;
+    sceneContainer.appendChild(div);
+
+    let buttonPCConfirm = document.getElementById("pcconfirm");
+    let buttonPCBack = document.getElementById("pcback");
+    
+    // PLAYER CREATION EVENTOS
+    
+    buttonPCConfirm.addEventListener("click", (e) =>{
+        savePlayer(); //guardo el jugador en la memoria local
+        town();
+    })
+    
+    buttonPCBack.addEventListener("click", (e) =>{
+        player = "";
+        playerCreation();
+    })
+
+
+}
+
+function town(){
+    clearScene();
+
+    sceneHeader.textContent = "Town";
+
+    let div = document.createElement("div");
+    div.innerHTML =`
+    <h2>The town is quiet.</h2>
+    <p>You are standing in the street in the middle of town.</p>
+    <p>You check your pockets, you currently have ${player.gold} gold.</p>
+    <p>Where would you like to go, ${player.name}?.</p>
+    <button id="goshop">Shop</button>
+    <button id="gowork">Work</button>
+    <button id="goadventure">Adventure</button>
+
+    `;
+    sceneContainer.appendChild(div);
+
+    let buttonGoShop = document.getElementById("goshop");
+    let buttonGoWork = document.getElementById("gowork");
+    let buttonGoAdventure = document.getElementById("goadventure");
+    
+    // PLAYER CREATION EVENTOS
+    
+    buttonGoShop.addEventListener("click", (e) =>{
+        itemShop();
+    })
+    
+    buttonGoWork.addEventListener("click", (e) =>{
+        //hacer funcion de work simple que te un poquito de gold
+    })
+
+    buttonGoAdventure.addEventListener("click", (e) =>{
+        //hacer funcion de adventure con opciones que requieren que tengas ciertos items y te dan mas gold
+    })
+}
+
+function itemShop(){
+    clearScene();
+
+    sceneHeader.textContent = "Item Shop";
+
+    let div1 = document.createElement("div");
+    div1.innerHTML =`
+    <h2>The shop is open for business.</h2>
+    <p>You currently have ${player.gold} gold.</p>
+    <p>The shop clerk greets you and shows you what items are currently available:</p>
+    `;
+    sceneContainer.appendChild(div1);
+
+    shop.showItems();
+
+    let div2 = document.createElement("div");
+    div2.innerHTML =`
+    <p>The clerk asks you what you're interested in.</p>
+    <form id="buyform">
+    <input type="text">
+    <input type="number">
+    <input type="submit" value="Add to Cart">
+    </form>
+    `;
+    sceneContainer.appendChild(div2);
+    let form = document.getElementById("buyform");
+
+    // ITEM SHOP BUY EVENTO
+    form.addEventListener("submit", (e) =>{
+        e.preventDefault();
+
+        let inputs = e.target.children;
+        let itemName = inputs[0].value;
+        let itemAmount = inputs[1].value;
+
+        if(itemName != "" && shop.itemExists(itemName))
+        {
+            if(!isNaN(itemAmount) && itemAmount > 0)
+            {
+                shop.shoppingCart.itemList.push(new CartItem(shop.itemExists(itemName), itemAmount));
+                itemShop();
+            }
+            else{
+                Swal.fire({title:"Please enter a valid amount.", confirmButtonColor:"grey"});
+                itemAmount = -1;
+            }
+        }
+        else{
+            Swal.fire({title:"Please enter a valid item.", confirmButtonColor:"grey"});
+            itemName = "";
+        }
+    })
+
+    // agregar opciones de mostrar shopping cart y de checkout de la tienda
+
+    let div3 = document.createElement("div");
+    div3.innerHTML =`
+    <p>These are the items in your cart:</p>
+    `;
+    sceneContainer.appendChild(div3);
+
+    shop.shoppingCart.showCartItems();
+
 }
 
 // FUNCIONES
@@ -199,27 +390,10 @@ function loadPlayer(){
     player = JSON.parse(localStorage.getItem("player"));
 }
 
-function generateItems(){
-    let lifePotion = new Item("life potion", "consumable", 50, "a potion that restores health");
-    let manaPotion = new Item("mana potion", "consumable", 60, "a potion that restores mana");
-    let invisibilityPotion = new Item("invisibility potion", "consumable", 100, "a potion that makes one invisible");
-    let dagger = new Item("dagger", "weapon", 20, "a sharp dagger");
-    let sword = new Item("sword", "weapon", 40, "a steel sword");
-    let shield = new Item("shield", "shield", 30, "a standard wooden shield");
-
-    const itemList = [lifePotion, manaPotion, invisibilityPotion, dagger, sword, shield]
-
-    return itemList;
-}
-
 //--------------------MAIN----------------------------- 
 
 let player = "";
 
-let shop = new Shop(generateItems());
+let shop = new Shop();
 
 startGame();
-
-//shop.showItems();
-
-//shop.buyItems(player);
