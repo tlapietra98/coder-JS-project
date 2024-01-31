@@ -1,7 +1,5 @@
-// TODO implementar escena donde se muestran los items del shop y la compra de items y su guardado en el inventario del jugador
 // TODO agregar opcione de checkout de la tienda en la funcion del item shop
-// TODO agregar chequeo del shopping cart, para que si ya tenes cierto item en el cart solo te agregue amount
-// TODO agregar boton para vaciar el cart
+// TODO implementar fetch de JSON y una promesa con await...???
 
 // REFERENCIAS A ELEMENTOS HTML
 const sceneHeader = document.getElementById("sceneHeader");
@@ -25,10 +23,27 @@ class Player{
         this.inventory = savedPlayer.inventory;
         }
 
-    showInfo(){
+
+    addToInventory(listItem){
+    
+        let existingItem = this.inventory.find((invItem) => invItem.item.name == listItem.item.name)
+
+        if (existingItem){
+            existingItem.amount = Number(existingItem.amount) + Number(listItem.amount);
+        }
+        else{
+            this.inventory.push(listItem);
+        }
     }
-    showInventoryString(){
-        
+
+    showInventory(){
+        this.inventory.forEach(listItem => {
+            let div = document.createElement("div");
+            div.innerHTML =`
+            <p>-${listItem.item.name}. Type: ${listItem.item.type}. ${listItem.item.description}. Amount: ${listItem.amount}.</p>
+            `;
+            sceneContainer.appendChild(div);
+        })
     }
 }
 
@@ -41,7 +56,7 @@ class Item{
     }
 }
 
-class CartItem{
+class ListItem{
     constructor(cItem, cAmount){
         this.item = new Item(cItem.name, cItem.type, cItem.price, cItem.description);
         this.amount = cAmount;
@@ -58,7 +73,7 @@ class ShoppingCart{
     }
 
     emptyCart(){
-        itemList = [];
+        this.itemList = [];
     }
 
     calculateTotal(){
@@ -78,6 +93,13 @@ class ShoppingCart{
             sceneContainer.appendChild(div);
         })
     }
+
+    giveItems(playerT){
+        this.itemList.forEach(i =>{
+            playerT.addToInventory(i);
+        })
+    }
+
 }
 
 class Shop{
@@ -112,45 +134,20 @@ class Shop{
         })
     }
 
-    //borrar ?
     buyItems(playerP){
         
-        let finishedShopping = false;
+            let totalGold = this.shoppingCart.calculateTotal();
 
-        while(!finishedShopping){
-        
-            let shopChoice = prompt("Please enter the name of the product you would like to purchase:");
-        
-            let p = this.itemList.find((item) => item.name === shopChoice);
-
-            if (p){
-                alert(`You have selected the ${p.name}.`);
+            if (totalGold <= playerP.gold) {
+                this.shoppingCart.giveItems(playerP);
+                this.shoppingCart.emptyCart();
+                playerP.gold -= totalGold;
+                Swal.fire({title:"Thank you for your purchase!", confirmButtonColor:"grey"});
             }
-            else{
-                shopChoice = "";
-                p = "";
-                alert("Please enter a valid name.");
+            else if(p.price > playerP.gold){
+                Swal.fire({title:"You don't have enough gold.", confirmButtonColor:"grey"});
             }
-            if (p.price > 0) {
-                if (p.price <= playerP.gold) {
-                    playerP.gold -= p.price;
-                    alert("Thank you for your purchase!");
-                    playerP.inventory.push(p);
-                    finishedShopping = true;
-                }
-                else if(p.price > playerP.gold){
-                    shopChoice = "";
-                    p = "";
-                    alert("You don't have enough gold!");
-                }
-            }
-            alert(`You currently have: ${playerP.gold} gold.`);
-            console.log(`You currently have: ${playerP.gold} gold.`);
-/*             alert(`You currently possess the following items in your inventory: ${playerP.inventory}.`);
-            console.log(`You currently possess the following items in your inventory: ${playerP.inventory}.`); */
-        }
     }
-
 }
 
 // ESCENAS
@@ -173,11 +170,9 @@ function startGame(){
     let buttonLoad = document.getElementById("loadgame");
     
     // GAME START EVENTOS
-
     buttonNew.addEventListener("click", (e) =>{
         playerCreation();
     })
-
     buttonLoad.addEventListener("click", (e) =>{
         localStorage.getItem("player") ? (loadPlayer(), town()) : Swal.fire({title:"There is no saved game!", confirmButtonColor:"grey"});
     })
@@ -247,7 +242,6 @@ function welcomePlayer(){
     let buttonPCBack = document.getElementById("pcback");
     
     // PLAYER CREATION EVENTOS
-    
     buttonPCConfirm.addEventListener("click", (e) =>{
         savePlayer(); //guardo el jugador en la memoria local
         town();
@@ -257,8 +251,6 @@ function welcomePlayer(){
         player = "";
         playerCreation();
     })
-
-
 }
 
 function town(){
@@ -266,33 +258,48 @@ function town(){
 
     sceneHeader.textContent = "Town";
 
-    let div = document.createElement("div");
-    div.innerHTML =`
+    let div1 = document.createElement("div");
+    div1.innerHTML =`
     <h2>The town is quiet.</h2>
     <p>You are standing in the street in the middle of town.</p>
     <p>You check your pockets, you currently have ${player.gold} gold.</p>
+    <button id="showinventory">Show Inventory</button>
+    `;
+    sceneContainer.appendChild(div1);
+
+    let buttonShowInventory = document.getElementById("showinventory");
+
+    // PLAYER SHOW INVENTORY EVENTO
+    buttonShowInventory.addEventListener("click", (e) =>{
+        player.state.showInventory ? player.state.showInventory = false : player.state.showInventory = true;
+        town();
+    })
+
+    if(player.state.showInventory){
+        player.showInventory();
+    }
+
+    let div2 = document.createElement("div");
+    div2.innerHTML =`
     <p>Where would you like to go, ${player.name}?.</p>
     <button id="goshop">Shop</button>
     <button id="gowork">Work</button>
     <button id="goadventure">Adventure</button>
 
     `;
-    sceneContainer.appendChild(div);
+    sceneContainer.appendChild(div2);
 
     let buttonGoShop = document.getElementById("goshop");
     let buttonGoWork = document.getElementById("gowork");
     let buttonGoAdventure = document.getElementById("goadventure");
     
     // PLAYER CREATION EVENTOS
-    
     buttonGoShop.addEventListener("click", (e) =>{
         itemShop();
     })
-    
     buttonGoWork.addEventListener("click", (e) =>{
         //hacer funcion de work simple que te un poquito de gold
     })
-
     buttonGoAdventure.addEventListener("click", (e) =>{
         //hacer funcion de adventure con opciones que requieren que tengas ciertos items y te dan mas gold
     })
@@ -337,7 +344,8 @@ function itemShop(){
         {
             if(!isNaN(itemAmount) && itemAmount > 0)
             {
-                shop.shoppingCart.itemList.push(new CartItem(shop.itemExists(itemName), itemAmount));
+                Number(itemAmount);
+                shop.shoppingCart.itemList.push(new ListItem(shop.itemExists(itemName), itemAmount));
                 itemShop();
             }
             else{
@@ -361,6 +369,41 @@ function itemShop(){
 
     shop.shoppingCart.showCartItems();
 
+    let div4 = document.createElement("div");
+    div4.innerHTML =`
+    <button id="buy">Buy</button>
+    <button id="emptycart">Empty Cart</button>
+    `;
+    sceneContainer.appendChild(div4);
+
+    let buttonBuy = document.getElementById("buy");
+    let buttonEmptyCart = document.getElementById("emptycart");
+    
+    // EVENTOS BUY Y VACIAR CARRO
+    buttonBuy.addEventListener("click", (e) =>{
+        shop.buyItems(player);
+        shop.shoppingCart.emptyCart();
+        itemShop();
+    })
+    
+    buttonEmptyCart.addEventListener("click", (e) =>{
+        shop.shoppingCart.emptyCart();
+        itemShop();
+        Swal.fire({title:"The cart has been emptied.", confirmButtonColor:"grey"});
+    })
+
+    let div5 = document.createElement("div");
+    div5.innerHTML =`
+    <button id="backtown">Go Back</button>
+    `;
+    sceneContainer.appendChild(div5);
+
+    let buttonBackTown = document.getElementById("backtown");
+
+    // EVENTO BACK
+    buttonBackTown.addEventListener("click", (e) =>{
+        town();
+    })
 }
 
 // FUNCIONES
