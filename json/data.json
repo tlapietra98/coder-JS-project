@@ -1,0 +1,9 @@
+[
+    { "name": "life potion", "type": "consumable", "price": 50, "description": "a potion that restores health"},
+    { "name": "mana potion", "type": "consumable", "price": 60, "description": "a potion that restores mana"},
+    { "name": "invisibility potion", "type": "consumable", "price": 100, "description": "a potion that makes one invisible"},
+    { "name": "dagger", "type": "weapon", "price": 20, "description": "a sharp dagger"},
+    { "name": "sword", "type": "weapon", "price": 40, "description": "a steel sword"},
+    { "name": "sword", "type": "weapon", "price": 40, "description": "a steel sword"}
+
+]

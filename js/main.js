@@ -110,14 +110,23 @@ class Shop{
     }
 
     generateItems(){
-        let lifePotion = new Item("life potion", "consumable", 50, "a potion that restores health");
-        let manaPotion = new Item("mana potion", "consumable", 60, "a potion that restores mana");
-        let invisibilityPotion = new Item("invisibility potion", "consumable", 100, "a potion that makes one invisible");
-        let dagger = new Item("dagger", "weapon", 20, "a sharp dagger");
-        let sword = new Item("sword", "weapon", 40, "a steel sword");
-        let shield = new Item("shield", "shield", 30, "a standard wooden shield");
+        fetch("./json/data.json")
+        .then((response) => response.json())
+        .then((reponse) => {
+            response.forEach((product) => {
+                this.itemList.push(new Item(product.name, product.type, product.price, product.description))
+            })
+        });
+
+
+        //let lifePotion = new Item("life potion", "consumable", 50, "a potion that restores health");
+        //let manaPotion = new Item("mana potion", "consumable", 60, "a potion that restores mana");
+        //let invisibilityPotion = new Item("invisibility potion", "consumable", 100, "a potion that makes one invisible");
+        //let dagger = new Item("dagger", "weapon", 20, "a sharp dagger");
+        //let sword = new Item("sword", "weapon", 40, "a steel sword");
+        //let shield = new Item("shield", "shield", 30, "a standard wooden shield");
     
-        this.itemList = [lifePotion, manaPotion, invisibilityPotion, dagger, sword, shield]
+        //this.itemList = [lifePotion, manaPotion, invisibilityPotion, dagger, sword, shield]
     }
 
     itemExists(itemN){ 
