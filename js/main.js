@@ -1,4 +1,3 @@
-// TODO agregar opcione de checkout de la tienda en la funcion del item shop
 // TODO implementar fetch de JSON y una promesa con await...???
 
 // REFERENCIAS A ELEMENTOS HTML
@@ -20,9 +19,8 @@ class Player{
         this.name = savedPlayer.name;
         this.gold = savedPlayer.gold;
         this.state = savedPlayer.state;
-        this.inventory = savedPlayer.inventory;
+        this.inventory = savedPlayer.inventory; //tendria que revisar esto para hacer que cada items se instancia como new Item... creo
         }
-
 
     addToInventory(listItem){
     
@@ -117,14 +115,41 @@ class Shop{
             this.itemList.push(new Item(response.name, response.equipment_category.name, 50, "A potion of red glimmering liquid that restores health"))
         });
 
-        /* let lifePotion = new Item("life potion", "consumable", 50, "a potion that restores health");
-        let manaPotion = new Item("mana potion", "consumable", 60, "a potion that restores mana");
-        let invisibilityPotion = new Item("invisibility potion", "consumable", 100, "a potion that makes one invisible");
-        let dagger = new Item("dagger", "weapon", 20, "a sharp dagger");
-        let sword = new Item("sword", "weapon", 40, "a steel sword");
-        let shield = new Item("shield", "shield", 30, "a standard wooden shield");
-    
-        this.itemList = [lifePotion, manaPotion, invisibilityPotion, dagger, sword, shield] */
+        fetch("https://www.dnd5eapi.co/api/magic-items/potion-of-speed")
+        .then((response) => response.json())
+        .then((response) => {
+            this.itemList.push(new Item(response.name, response.equipment_category.name, 100, "A potion of yellow liquid with streaks of black that grants haste"))
+        });
+
+        fetch("https://www.dnd5eapi.co/api/magic-items/potion-of-invisibility")
+        .then((response) => response.json())
+        .then((response) => {
+            this.itemList.push(new Item(response.name, response.equipment_category.name, 200, "A potion of transparent liquid that renders one invisible"))
+        });
+
+        fetch("https://www.dnd5eapi.co/api/equipment/dagger")
+        .then((response) => response.json())
+        .then((response) => {
+            this.itemList.push(new Item(response.name, response.equipment_category.name, 2, "A light dagger that can be wielded with finesse or thrown at enemies"))
+        });
+
+        fetch("https://www.dnd5eapi.co/api/equipment/shortsword")
+        .then((response) => response.json())
+        .then((response) => {
+            this.itemList.push(new Item(response.name, response.equipment_category.name, 10, "A steel shortsword which can pierce and cut"))
+        });
+
+        fetch("https://www.dnd5eapi.co/api/equipment/longsword")
+        .then((response) => response.json())
+        .then((response) => {
+            this.itemList.push(new Item(response.name, response.equipment_category.name, 15, "A versatile longsword to slash enemies"))
+        });
+
+        fetch("https://www.dnd5eapi.co/api/equipment/shield")
+        .then((response) => response.json())
+        .then((response) => {
+            this.itemList.push(new Item(response.name, response.equipment_category.name, 10, "A sturdy wooden shield to protect from attacks"))
+        });
     }
 
     itemExists(itemN){ 
@@ -150,6 +175,7 @@ class Shop{
                 this.shoppingCart.emptyCart();
                 playerP.gold -= totalGold;
                 Swal.fire({title:"Thank you for your purchase!", confirmButtonColor:"grey"});
+                savePlayer();
             }
             else if(p.price > playerP.gold){
                 Swal.fire({title:"You don't have enough gold.", confirmButtonColor:"grey"});
@@ -216,7 +242,7 @@ function playerCreation(){
         {
             if(!isNaN(gold) && gold > 0)
             {
-                player = createPlayer(name, gold); //creo al jugador y le asigno a player
+                createPlayer(name, gold);
                 welcomePlayer();
             }
             else{
@@ -428,8 +454,7 @@ function clearScene(){
 }
 
 function createPlayer(playerName, playerGold){
-    const createdPlayer = new Player(playerName, playerGold);
-    return createdPlayer;
+    player = new Player(playerName, playerGold);
 }
 
 function savePlayer(){
@@ -437,7 +462,9 @@ function savePlayer(){
 }
 
 function loadPlayer(){
-    player = JSON.parse(localStorage.getItem("player"));
+    let savedPlayer = JSON.parse(localStorage.getItem("player"));
+    player = new Player(savedPlayer.name, savedPlayer.gold);
+    player.loadSavedData(savedPlayer);
 }
 
 //--------------------MAIN----------------------------- 
