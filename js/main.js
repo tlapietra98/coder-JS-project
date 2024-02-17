@@ -110,7 +110,7 @@ class Shop{
     }
 
     generateItems(){
-        fetch("./json/data.json")
+        fetch("https://github.com/tlapietra98/coder-JS-project/blob/main/json/data.json")
         .then((response) => response.json())
         .then((reponse) => {
             response.forEach((product) => {
