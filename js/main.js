@@ -110,23 +110,21 @@ class Shop{
     }
 
     generateItems(){
-        //fetch("./json/data.json")
-        //.then((response) => response.json())
-        //.then((reponse) => {
-        //    response.forEach((product) => {
-        //        this.itemList.push(new Item(product.name, product.type, product.price, product.description))
-        //    })
-        //});
+        
+        fetch("https://www.dnd5eapi.co/api/magic-items/potion-of-healing")
+        .then((response) => response.json())
+        .then((response) => {
+            this.itemList.push(new Item(response.name, response.equipment_category.name, 50, "A potion of red glimmering liquid that restores health"))
+        });
 
-
-        let lifePotion = new Item("life potion", "consumable", 50, "a potion that restores health");
+        /* let lifePotion = new Item("life potion", "consumable", 50, "a potion that restores health");
         let manaPotion = new Item("mana potion", "consumable", 60, "a potion that restores mana");
         let invisibilityPotion = new Item("invisibility potion", "consumable", 100, "a potion that makes one invisible");
         let dagger = new Item("dagger", "weapon", 20, "a sharp dagger");
         let sword = new Item("sword", "weapon", 40, "a steel sword");
         let shield = new Item("shield", "shield", 30, "a standard wooden shield");
     
-        this.itemList = [lifePotion, manaPotion, invisibilityPotion, dagger, sword, shield]
+        this.itemList = [lifePotion, manaPotion, invisibilityPotion, dagger, sword, shield] */
     }
 
     itemExists(itemN){ 
